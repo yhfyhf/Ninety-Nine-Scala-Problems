@@ -63,6 +63,23 @@ package arithmetic {
      * res0: Map[Int,Int] = Map(3 -> 2, 5 -> 1, 7 -> 1)
      */
     def primeFactorMultiplicity: List[(Int, Int)] = num.primeFactors.groupBy(e => e).toList.map(p => (p._1, p._2.length)).sortBy(_._1)
+
+    /**
+     * P40
+     * Goldbach's conjecture.
+     * Goldbach's conjecture says that every positive even number greater than 2 is the sum of two prime numbers.
+     * E.g. 28 = 5 + 23. It is one of the most famous facts in number theory that has not been proved to be correct in
+     * the general case. It has been numerically confirmed up to very large numbers (much larger than Scala's Int can
+     * represent). Write a function to find the two prime numbers that sum up to a given even integer.
+     * scala> 28.goldbach
+     * res0: (Int, Int) = (5,23)
+     */
+    def goldbach: (Int, Int) = {
+      primes takeWhile { _ < num / 2 + 1 } find { p => (num - p).isPrime } match {
+        case None     => throw new IllegalArgumentException
+        case Some(p1) => (p1, num - p1)
+      }
+    }
   }
 
   object S99Int {
@@ -79,6 +96,44 @@ package arithmetic {
      */
     def gcd(x: Int, y: Int): Int = if (y == 0) x else gcd(y, x % y)
 
+    /**
+     * P39
+     * A list of prime numbers.
+     * Given a range of integers by its lower and upper limit, construct a list of all prime numbers in that range.
+     * scala> listPrimesinRange(7 to 31)
+     * res0: List[Int] = List(7, 11, 13, 17, 19, 23, 29, 31)
+     */
+    def listPrimesRange(r: Range): List[Int] = primes.dropWhile(_ < r.head).takeWhile(_ <= r.last).toList
+
+    /**
+     * P41
+     * A list of Goldbach compositions.
+     * Given a range of integers by its lower and upper limit, print a list of all even numbers and their Goldbach composition.
+     * scala> printGoldbachList(9 to 20)
+     * 10 = 3 + 7
+     * 12 = 5 + 7
+     * 14 = 3 + 11
+     * 16 = 3 + 13
+     * 18 = 5 + 13
+     * 20 = 3 + 17
+     * In most cases, if an even number is written as the sum of two prime numbers, one of them is very small. Very
+     * rarely, the primes are both bigger than, say, 50. Try to find out how many such cases there are in the range 2..3000.
+     *
+     * Example (minimum value of 50 for the primes):
+     * scala> printGoldbachListLimited(1 to 2000, 50)
+     * 992 = 73 + 919
+     * 1382 = 61 + 1321
+     * 1856 = 67 + 1789
+     * 1928 = 61 + 1867
+     */
+    def printGoldbachListLimited(r: Range): Unit = r.filter(_ % 2 == 0).map(_.goldbach).foreach(p => println(p._1+p._2+" = "+p._1+" + "+p._2))
+
+    def printGoldbachListLimited(r: Range, min: Int): Unit = r.filter(
+      p => p > 2 && p % 2 == 0
+    ).map(_.goldbach).filter(_._1 > 50) foreach {
+      p => println(p._1 + p._2 + " = " + p._1 + " + " + p._2)
+    }
+
     def main(args: Array[String]) {
       assert(7.isPrime == true)
       assert(gcd(36, 63) == 9)
@@ -86,6 +141,10 @@ package arithmetic {
       assert(10.totient == 4)
       assert(315.primeFactors == List(3, 3, 5, 7))
       assert(315.primeFactorMultiplicity == List((3,2), (5,1), (7,1)))
+      assert(listPrimesRange(7 to 31) == List(7, 11, 13, 17, 19, 23, 29, 31))
+      assert(28.goldbach ==(5, 23))
+      printGoldbachListLimited(9 to 20)
+      printGoldbachListLimited(9 to 2000, 50)
     }
   }
 }
